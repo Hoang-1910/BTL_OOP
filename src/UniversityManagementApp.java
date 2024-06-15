@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
@@ -9,6 +11,7 @@ public class UniversityManagementApp extends JFrame {
     private JTextField lectureIdField, lectureIdField2, lectureNameField, lectureDobField, lectureGenderField;
     private JTextField subjectIdField, subjectNameField, registerStudentIdField, registerSubjectIdField;
     private JTextArea displayArea;
+    private JTable studentTable, lecturerTable, subjecTable;
     private JButton addStudentButton, updateStudentButton, deleteStudentButton, registerSubjectButton, deleteRegisterSubjectButton;
     private JButton addLectureButton, updateLectureButton, deleteLectureButton;
     private JButton addSubjectButton, updateSubjectButton, deleteSubjectButton;
@@ -18,7 +21,7 @@ public class UniversityManagementApp extends JFrame {
 
     public UniversityManagementApp() {
         setTitle("University Management System");
-        setSize(2000, 600);
+        setSize(1200, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(null);
 
@@ -67,17 +70,6 @@ public class UniversityManagementApp extends JFrame {
         deleteStudentButton.setBounds(330, 160, 150, 25);
         add(deleteStudentButton);
 
-        JButton showButton = new JButton("Show");
-        showButton.setBounds(330, 100, 150, 25);
-        add(showButton);
-        // Sự kiện show thông tin
-        showButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateDisplayArea();
-            }
-        });
-
         // Sự kiện add student
         addStudentButton.addActionListener(new ActionListener() {
             @Override
@@ -93,6 +85,7 @@ public class UniversityManagementApp extends JFrame {
 
                     JOptionPane.showMessageDialog(null, "Student added successfully!");
                     updateDisplayArea();
+                    loadStudentData();
                     clearFields();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
@@ -116,6 +109,7 @@ public class UniversityManagementApp extends JFrame {
 
                     JOptionPane.showMessageDialog(null, "Student updated successfully!");
                     updateDisplayArea();
+                    loadStudentData();
                     clearFields();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
@@ -133,6 +127,7 @@ public class UniversityManagementApp extends JFrame {
                     studentDAO.deleteStudent(studentID);
                     JOptionPane.showMessageDialog(null, "Student deleted successfully!");
                     updateDisplayArea();
+                    loadStudentData();
                     clearFields();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
@@ -200,6 +195,7 @@ public class UniversityManagementApp extends JFrame {
                     lectureDAO.addLecture(lecture);
                     JOptionPane.showMessageDialog(null, "Lecture added successfully!");
                     updateDisplayArea();
+                    loadLecturerData();
                     clearFields();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
@@ -223,6 +219,7 @@ public class UniversityManagementApp extends JFrame {
                     
                     JOptionPane.showMessageDialog(null, "Lecture updated successfully!");
                     updateDisplayArea();
+                    loadLecturerData();
                     clearFields();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
@@ -241,6 +238,7 @@ public class UniversityManagementApp extends JFrame {
 
                     JOptionPane.showMessageDialog(null, "Lecture deleted successfully!");
                     updateDisplayArea();
+                    loadLecturerData();
                     clearFields();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
@@ -300,6 +298,7 @@ public class UniversityManagementApp extends JFrame {
         
                     JOptionPane.showMessageDialog(null, "Subject added successfully!");
                     updateDisplayArea();
+                    loadSubjectData();
                     clearFields();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
@@ -321,6 +320,7 @@ public class UniversityManagementApp extends JFrame {
 
                     JOptionPane.showMessageDialog(null, "Subject updated successfully!");
                     updateDisplayArea();
+                    loadSubjectData();
                     clearFields();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
@@ -339,6 +339,7 @@ public class UniversityManagementApp extends JFrame {
 
                     JOptionPane.showMessageDialog(null, "Subject deleted successfully!");
                     updateDisplayArea();
+                    loadSubjectData();
                     clearFields();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
@@ -415,9 +416,91 @@ public class UniversityManagementApp extends JFrame {
         // Display Area
         displayArea = new JTextArea();
         JScrollPane scrollPane = new JScrollPane(displayArea);
-        scrollPane.setBounds(500, 200, 300, 300);
+        scrollPane.setBounds(800, 10, 300, 200);
         add(scrollPane);
+        updateDisplayArea();
 
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setBounds(500, 200,600,300);
+        JPanel studentPanel = createStudentPanel();
+        JPanel lecturerPanel = createLecturerPanel();
+        JPanel subjectPanel = createSubjectPanel();
+        tabbedPane.addTab("Students", studentPanel);
+        tabbedPane.addTab("Lecturer", lecturerPanel);
+        tabbedPane.addTab("Subject", subjectPanel);
+        add(tabbedPane, BorderLayout.CENTER);
+        loadStudentData();
+        loadLecturerData();
+        loadSubjectData();
+    }
+    
+    public void loadStudentData() {
+        try {
+            List<Student> students = studentDAO.getAllStudents();
+            DefaultTableModel model = (DefaultTableModel) studentTable.getModel();
+            model.setRowCount(0);
+            for (Student student : students) {
+                model.addRow(new Object[]{student.getStudentId(), student.getName(), student.getDateOfBirth(), student.getGender()});
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadLecturerData(){
+        try {
+            List<Lecture> lectures = lectureDAO.getAllLectures();
+            DefaultTableModel model = (DefaultTableModel) lecturerTable.getModel();
+            model.setRowCount(0);
+            for (Lecture lecture : lectures) {
+                model.addRow(new Object[]{lecture.getLectureId(), lecture.getName(), lecture.getDateOfBirth(),lecture.getGender()});
+            }
+        }
+        catch( SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void loadSubjectData(){
+        try {
+            List<Subject> subjects = subjectDAO.getAllSubjects();
+
+            DefaultTableModel model = (DefaultTableModel) subjecTable.getModel();
+            model.setRowCount(0);
+            for (Subject subject : subjects) {
+                Lecture lecture = subjectDAO.getLecturerForSubject(subject.getSubjectId());
+                model.addRow(new Object[]{subject.getSubjectId(), subject.getSubjectName(), lecture.getName()});
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+    private JPanel createStudentPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        String[] columnNames = {"Student ID", "Name", "Date of Birth", "Gender"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+        studentTable = new JTable(model);
+        panel.add(new JScrollPane(studentTable), BorderLayout.CENTER);
+        return panel;
+    }
+    private JPanel createLecturerPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        String[] columnNames = {"Lecturer ID", "Name", "Date of Birth", "Gender"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+        lecturerTable = new JTable(model);
+        panel.add(new JScrollPane(lecturerTable), BorderLayout.CENTER);
+        return panel;
+    }
+    private JPanel createSubjectPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        String[] columnNames = {"Subject ID", "Subject Name", "Lecturer"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+        subjecTable = new JTable(model);
+        panel.add(new JScrollPane(subjecTable), BorderLayout.CENTER);
+        return panel;
     }
 
     // xóa các ô sau khi thực hiện 
@@ -444,32 +527,8 @@ public class UniversityManagementApp extends JFrame {
         displayArea.setText("");
         try {
             List<Student> students = studentDAO.getAllStudents();
-            displayArea.append("Students:\n");
-            for (Student student : students) {
-                displayArea.append(student.getStudentId() + ", " + student.getName() + ", " + student.getDateOfBirth() + ", " + student.getGender() + "\n");
-            }
-            displayArea.append("\n");
-
-            List<Lecture> lectures = lectureDAO.getAllLectures();
-            displayArea.append("Lectures:\n");
-            for (Lecture lecture : lectures) {
-                displayArea.append(lecture.getLectureId() + ", " + lecture.getName() + ", " + lecture.getDateOfBirth() + ", " + lecture.getGender() + "\n");
-            }
-            displayArea.append("\n");
-
             List<Subject> subjects = subjectDAO.getAllSubjects();
-            displayArea.append("Subjects:\n");
-            for (Subject subject : subjects) {
-                displayArea.append(subject.getSubjectId() + ", " + subject.getSubjectName());
-                Lecture lecturer = subjectDAO.getLecturerForSubject(subject.getSubjectId());
-                if (lecturer != null) {
-                    displayArea.append(", Lecturer: " + lecturer.getName() + "\n");
-                } else {
-                    displayArea.append(", No assigned lecturer\n");
-                }
-            }
-
-            displayArea.append("\nList student registered:\n");
+            displayArea.append("List student registered:\n");
             for (Subject subject : subjects) {
                 displayArea.append("\n" + subject.getSubjectName() + ":\n");
                 List<Student> students1 = studentDAO.getStudentsForSubject(subject.getSubjectId());
