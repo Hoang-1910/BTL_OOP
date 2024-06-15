@@ -477,10 +477,10 @@ public class UniversityManagementApp extends JFrame {
     }
     private JPanel createStudentPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-
         String[] columnNames = {"Student ID", "Name", "Date of Birth", "Gender"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0);
         studentTable = new JTable(model);
+        studentTable.setEnabled(false);
         panel.add(new JScrollPane(studentTable), BorderLayout.CENTER);
         return panel;
     }
@@ -490,6 +490,7 @@ public class UniversityManagementApp extends JFrame {
         String[] columnNames = {"Lecturer ID", "Name", "Date of Birth", "Gender"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0);
         lecturerTable = new JTable(model);
+        lecturerTable.setEnabled(false);
         panel.add(new JScrollPane(lecturerTable), BorderLayout.CENTER);
         return panel;
     }
@@ -499,6 +500,7 @@ public class UniversityManagementApp extends JFrame {
         String[] columnNames = {"Subject ID", "Subject Name", "Lecturer"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0);
         subjecTable = new JTable(model);
+        subjecTable.setEnabled(false);
         panel.add(new JScrollPane(subjecTable), BorderLayout.CENTER);
         return panel;
     }
